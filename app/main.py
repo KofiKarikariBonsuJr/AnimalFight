@@ -144,22 +144,12 @@ def view_calculation_page(request: Request, calc_id: str):
     """
     return templates.TemplateResponse("view_calculation.html", {"request": request, "calc_id": calc_id})
 
-@app.get("/dashboard/edit/{calc_id}", response_class=HTMLResponse, tags=["web"])
-def edit_calculation_page(request: Request, calc_id: str):
-    """
-    Page for editing a calculation (Update).
-    
-    Part of the BREAD (Browse, Read, Edit, Add, Delete) pattern:
-    - This is the Edit page
-    
-    Args:
-        request: The FastAPI request object (required by Jinja2)
-        calc_id: UUID of the calculation to edit
-        
-    Returns:
-        HTMLResponse: Rendered template with calculation ID passed to frontend
-    """
-    return templates.TemplateResponse("edit_calculation.html", {"request": request, "calc_id": calc_id})
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request}
+    )
 
 
 # ------------------------------------------------------------------------------
@@ -392,6 +382,29 @@ def delete_calculation(
     db.delete(calculation)
     db.commit()
     return None
+
+class FightRequest(BaseModel):
+    animal1: str
+    animal2: str
+    biome: str
+
+
+@app.post("/fight")
+def fight(body: FightRequest):
+    prompt = (
+        f"In a fight between a {body.animal1} and a {body.animal2} in a {body.biome} biome, "
+        f"who would win and why?"
+    )
+
+    completion = client.chat.completions.create(
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": "You are a knowledgeable zoologist and ecologist."},
+            {"role": "user", "content": prompt},
+        ],
+    )
+
+    return {"outcome": completion.choices[0].message.content}
 
 
 # ------------------------------------------------------------------------------
