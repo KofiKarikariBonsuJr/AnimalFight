@@ -1,41 +1,50 @@
-from flask import Flask, request, jsonify
-from openai import OpenAI
-from dotenv import load_dotenv
-load_dotenv()
 import os
+from dotenv import load_dotenv
+from openai import OpenAI
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+from fastapi import FastAPI
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+load_dotenv()
 
-@app.route("/")
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY is not set")
+
+client = OpenAI(api_key=api_key)
+
+app = FastAPI()
+
+# Serve your static homepage (expects ./index.html in the working directory)
+@app.get("/")
 def index():
-    return app.send_static_file("index.html")
+    return FileResponse("index.html")
 
-@app.route("/fight", methods=["POST"])
-def fight():
-    body = request.json
-    animal1 = body.get("animal1")
-    animal2 = body.get("animal2")
-    biome   = body.get("biome")
+# Optional: used by your Docker HEALTHCHECK
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
-    # Construct prompt for GPT
+class FightRequest(BaseModel):
+    animal1: str
+    animal2: str
+    biome: str
+
+@app.post("/fight")
+def fight(body: FightRequest):
     prompt = (
-      f"In a fight between a {animal1} and a {animal2} in a {biome} biome, "
-      f"who would win and why? Provide a concise answer."
+        f"In a fight between a {body.animal1} and a {body.animal2} in a {body.biome} biome, "
+        f"who would win and why? Provide a concise answer."
     )
 
     completion = client.chat.completions.create(
-      model="gpt-4.1-mini",        # choose the model here
-      messages=[
-        {"role": "system", "content": "You are a knowledgeable zoologist and ecologist."},
-        {"role": "user",   "content": prompt}
-      ]
+        model="gpt-4.1-mini",
+        messages=[
+            {"role": "system", "content": "You are a knowledgeable zoologist and ecologist."},
+            {"role": "user", "content": prompt},
+        ],
     )
 
     outcome = completion.choices[0].message.content
-
-    return jsonify({ "outcome": outcome })
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    return {"outcome": outcome}

@@ -67,3 +67,6 @@ pytest-pylint>=0.21.0
 flask
 
 pylance
+pydantic
+
+uvicorn
