@@ -2,8 +2,10 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 load_dotenv()
@@ -16,20 +18,32 @@ client = OpenAI(api_key=api_key)
 
 app = FastAPI()
 
-# Serve your static homepage (expects ./index.html in the working directory)
-@app.get("/")
-def index():
-    return FileResponse("dashboard.html")
+# Mount static files (CSS, JS, images)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Optional: used by your Docker HEALTHCHECK
+# Templates directory (same as Flask)
+templates = Jinja2Templates(directory="templates")
+
+
+# ---------- ROUTES ----------
+
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
 
 class FightRequest(BaseModel):
     animal1: str
     animal2: str
     biome: str
+
 
 @app.post("/fight")
 def fight(body: FightRequest):
@@ -46,5 +60,4 @@ def fight(body: FightRequest):
         ],
     )
 
-    outcome = completion.choices[0].message.content
-    return {"outcome": outcome}
+    return {"outcome": completion.choices[0].message.content}
