@@ -61,3 +61,10 @@ def fight(body: FightRequest):
     )
 
     return {"outcome": completion.choices[0].message.content}
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request}
+    )
