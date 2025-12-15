@@ -64,5 +64,4 @@ pylint>=3.0.0
 pytest-pylint>=0.21.0
 
 # Additional dependencies (auto-installed with above)
-
 flask
