@@ -26,8 +26,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles  # For serving static files (CSS, JS)
 from fastapi.templating import Jinja2Templates  # For HTML templates
-
+from pydantic import BaseModel
 from sqlalchemy.orm import Session  # SQLAlchemy database session
+
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+from fastapi.templating import Jinja2Templates
 
 import uvicorn  # ASGI server for running FastAPI apps
 
