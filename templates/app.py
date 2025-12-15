@@ -35,7 +35,7 @@ class FightRequest(BaseModel):
 def fight(body: FightRequest):
     prompt = (
         f"In a fight between a {body.animal1} and a {body.animal2} in a {body.biome} biome, "
-        f"who would win and why? Provide a concise answer."
+        f"who would win and why?"
     )
 
     completion = client.chat.completions.create(
