@@ -19,7 +19,7 @@ app = FastAPI()
 # Serve your static homepage (expects ./index.html in the working directory)
 @app.get("/")
 def index():
-    return FileResponse("index.html")
+    return FileResponse("dashboard.html")
 
 # Optional: used by your Docker HEALTHCHECK
 @app.get("/health")
