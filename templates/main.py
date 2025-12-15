@@ -34,6 +34,13 @@ def index(request: Request):
         {"request": request}
     )
 
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request}
+    )
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -62,9 +69,3 @@ def fight(body: FightRequest):
 
     return {"outcome": completion.choices[0].message.content}
 
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
-    return templates.TemplateResponse(
-        "dashboard.html",
-        {"request": request}
-    )
