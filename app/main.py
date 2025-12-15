@@ -45,6 +45,12 @@ from app.schemas.token import TokenResponse  # API token schema
 from app.schemas.user import UserCreate, UserResponse, UserLogin  # User schemas
 from app.database import Base, get_db, engine  # Database connection
 
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
+    raise RuntimeError("OPENAI_API_KEY is not set")
+
+client = OpenAI(api_key=OPENAI_API_KEY)
+
 
 # ------------------------------------------------------------------------------
 # Create tables on startup using the lifespan event
@@ -117,20 +123,6 @@ def register_page(request: Request):
     Displays a form for new users to create an account.
     """
     return templates.TemplateResponse("register.html", {"request": request})
-
-@app.get("/dashboard", response_class=HTMLResponse, tags=["web"])
-def dashboard_page(request: Request):
-    """
-    Dashboard page, listing calculations & new calculation form.
-    
-    This is the main interface after login, where users can:
-    - See all their calculations
-    - Create a new calculation
-    - Access links to view/edit/delete calculations
-    
-    JavaScript in this page calls the API endpoints to fetch and display data.
-    """
-    return templates.TemplateResponse("dashboard.html", {"request": request})
 
 @app.get("/dashboard/view/{calc_id}", response_class=HTMLResponse, tags=["web"])
 def view_calculation_page(request: Request, calc_id: str):
@@ -417,4 +409,4 @@ def fight(body: FightRequest):
 # ------------------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, log_level="info")
