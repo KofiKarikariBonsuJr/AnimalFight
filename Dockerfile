@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Run database initialization before starting the app
 CMD python -m app.database_init && \
-    uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+    uvicorn app.main:app --host 0.0.0.0 --port 8080 --workers 4
